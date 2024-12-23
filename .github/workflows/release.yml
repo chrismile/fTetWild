@@ -49,11 +49,10 @@ jobs:
         include:
           # Linux targets.
           - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
             target_name: x86_64-linux
           # Windows targets.
           - os: windows-latest
-            target_name: x86_64-windows-gnu
+            target_name: x86_64-windows
 
     name: "Create release-artifacts target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
@@ -115,7 +114,7 @@ jobs:
           cp "README.md" "dist/docs"
           cp "LICENSE.MPL2" "dist/docs/LICENSE"
           cp "LICENSE-gmp.txt" "dist/docs/LICENSE-gmp.txt"
-          cp "CMake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
+          cp "cmake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
           cp "src/*.h" "dist/include/"
           cp "src/*.hpp" "dist/include/"
           if [ "$RUNNER_OS" == "Linux" ]; then
