@@ -1,0 +1,131 @@
+# BSD 3-Clause License
+# 
+# Copyright (c) 2024, Christoph Neuhauser
+# All rights reserved.
+# 
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+# 
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+# 
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+# 
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+# 
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  generate:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux targets.
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            target_name: x86_64-linux
+          - os: ubuntu-22.04
+            target: aarch64-unknown-linux-gnu
+            target_name: aarch64-linux
+          # Windows targets.
+          - os: windows-latest
+            target_name: x86_64-windows-gnu
+
+    name: "${{ github.workflow }} target ${{ matrix.target_name }}"
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: "latest"
+          activate-environment: ftetwild
+          python-version: 3.12
+
+      - name: Build target
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              sudo apt install -y libgmp-dev
+          fi
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              export CONDA_ALWAYS_YES="true"
+              conda install -c conda-forge mpir
+              export GMP_INC=$CONDA_PREFIX/Library/include
+              export GMP_LIB=$CONDA_PREFIX/Library/lib
+          fi
+          if [ "$RUNNER_OS" == "macOS" ]; then
+              brew install gmp
+          fi
+          if [ "$RUNNER_OS" == "Linux" ] && [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+              sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
+              cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="CMake/aarch64-linux-gnu.toolchain.cmake"
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+              cmake . -B build -DCMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
+          else
+              cmake . -B build -DCMAKE_BUILD_TYPE=Release
+          fi
+          cmake --build build --config Release
+
+      - name: Copy files
+        shell: bash
+        run: |
+          proj_name=${{ github.event.repository.name }}
+          exec_name=FloatTetwild_bin
+          mkdir dist
+          mkdir dist/bin
+          mkdir dist/docs
+          mkdir dist/include
+          mkdir dist/lib
+          mkdir dist/lib/cmake
+          mkdir dist/lib/cmake/${proj_name}
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              cp "build/${exec_name}.exe" "dist/bin/"
+          else
+              cp "build/${exec_name}" "dist/bin/"
+          fi
+          cp "README.md" "dist/docs"
+          cp "LICENSE.MPL2" "dist/docs/LICENSE"
+          cp "LICENSE-gmp.txt" "dist/docs/LICENSE-gmp.txt"
+          cp "CMake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
+          cp "src/*.h" "dist/include/"
+          cp "src/*.hpp" "dist/include/"
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              cp "build/libFloatTetwild.a" dist/lib/
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+              if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
+                  cp "build/libFloatTetwild.a" dist/lib/
+              fi
+          fi
+          # Copy GMP libraries.
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
+              patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+          fi
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              cp "$CONDA_PREFIX/Library/bin/gmp.dll" dist/bin/
+              cp "$CONDA_PREFIX/Library/bin/mpir.dll" dist/bin/
+          fi
