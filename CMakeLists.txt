@@ -170,6 +170,17 @@ if(FLOAT_TETWILD_TOPLEVEL_PROJECT)
 	if(NOT (${CMAKE_VERSION} VERSION_LESS "3.6.0"))
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME}_bin)
 	endif()
+
+	# Custom additions for shippable builds that are NOT part of the original TetGen repository.
+	if ((UNIX AND NOT APPLE) OR (MSYS OR MINGW OR (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")))
+		target_link_options(${PROJECT_NAME}_bin PRIVATE -static-libgcc -static-libstdc++)
+	endif()
+	if (UNIX AND NOT APPLE)
+		target_link_options(${PROJECT_NAME}_bin PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/cmake/symbols_linux_gcc.map")
+	endif()
+	if (MSVC)
+		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+	endif()
 endif()
 
 ################################################################################
