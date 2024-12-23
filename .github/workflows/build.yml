@@ -83,7 +83,7 @@ jobs:
           #    cmake . -B build -DCMAKE_BUILD_TYPE=Release
           #else
           #    cmake . -B build -DCMAKE_BUILD_TYPE=Release
-          #fi
+          fi
           cmake . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
