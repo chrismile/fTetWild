@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.8)
 project(FloatTetwild)
 ################################################################################
 
+if (MSVC)
+	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # Detects whether this is a top-level project
 get_directory_property(HAS_PARENT PARENT_DIRECTORY)
 if(HAS_PARENT)
@@ -177,9 +181,6 @@ if(FLOAT_TETWILD_TOPLEVEL_PROJECT)
 	endif()
 	if (UNIX AND NOT APPLE)
 		target_link_options(${PROJECT_NAME}_bin PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/cmake/symbols_linux_gcc.map")
-	endif()
-	if (MSVC)
-		set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 	endif()
 endif()
 

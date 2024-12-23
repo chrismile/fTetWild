@@ -84,14 +84,7 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
               brew install gmp
           fi
-          if [ "$RUNNER_OS" == "Linux" ] && [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
-              sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross
-              cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE="CMake/aarch64-linux-gnu.toolchain.cmake"
-          elif [ "$RUNNER_OS" == "Windows" ]; then
-              cmake . -B build -DCMAKE_BUILD_TYPE=Release -G "MSYS Makefiles"
-          else
-              cmake . -B build -DCMAKE_BUILD_TYPE=Release
-          fi
+          cmake . -B build -DCMAKE_BUILD_TYPE=Release
           cmake --build build --config Release
 
       - name: Copy files
@@ -115,8 +108,8 @@ jobs:
           cp "LICENSE.MPL2" "dist/docs/LICENSE"
           cp "LICENSE-gmp.txt" "dist/docs/LICENSE-gmp.txt"
           cp "cmake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
-          cp "src/*.h" "dist/include/"
-          cp "src/*.hpp" "dist/include/"
+          cp src/*.h dist/include/
+          cp src/*.hpp dist/include/
           if [ "$RUNNER_OS" == "Linux" ]; then
               cp "build/libFloatTetwild.a" dist/lib/
           elif [ "$RUNNER_OS" == "Windows" ]; then
