@@ -65,7 +65,7 @@ jobs:
         shell: bash -el {0}
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt install -y libgmp-dev
+              sudo apt install -y libgmp-dev patchelf
           fi
           if [ "$RUNNER_OS" == "Windows" ]; then
               export CONDA_ALWAYS_YES="true"
@@ -118,3 +118,9 @@ jobs:
               cp "$CONDA_PREFIX/Library/bin/gmp.dll" dist/bin/
               cp "$CONDA_PREFIX/Library/bin/mpir.dll" dist/bin/
           fi
+
+      - name: Run Example
+        shell: bash -el {0}
+        run: |
+          cd dist
+          ./FloatTetwild_bin --input ../tests/bunny.off --level 0  --stop-energy 200
