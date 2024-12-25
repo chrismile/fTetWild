@@ -65,6 +65,10 @@ jobs:
     name: "Create release-artifacts target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
 
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+
     env:
       artifact_name: ${{ github.event.repository.name }}-${{ github.event.release.tag_name }}-${{ matrix.target_name }}
 
@@ -83,7 +87,6 @@ jobs:
           python-version: 3.12
 
       - name: Build target
-        shell: ${{ matrix.shell }}
         run: |
           CMAKE_ARGS=()
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -106,7 +109,6 @@ jobs:
           cmake --build build --config Release
 
       - name: Copy files
-        shell: ${{ matrix.shell }}
         run: |
           proj_name=${{ github.event.repository.name }}
           exec_name=FloatTetwild_bin
