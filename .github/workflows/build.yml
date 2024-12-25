@@ -45,9 +45,13 @@ jobs:
           # Linux targets.
           - os: ubuntu-22.04
             target_name: x86_64-linux
+          - os: ubuntu-24.04
+            target_name: x86_64-linux-u2404
           # Windows targets.
-          - os: windows-2019
+          - os: windows-2022
             target_name: x86_64-windows
+          - os: windows-2022
+            target_name: x86_64-windows-gnu
 
     name: "${{ github.workflow }} target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
@@ -64,19 +68,24 @@ jobs:
       - name: Build target
         shell: bash -el {0}
         run: |
+          CMAKE_ARGS=()
           if [ "$RUNNER_OS" == "Linux" ]; then
               sudo apt install -y libgmp-dev patchelf
           fi
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "${{ matrix.target_name }}" == "x86_64-windows" ]; then
               export CONDA_ALWAYS_YES="true"
               conda install -c conda-forge mpir
               export GMP_INC=$CONDA_PREFIX/Library/include
               export GMP_LIB=$CONDA_PREFIX/Library/lib
           fi
+          if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
+              pacman --noconfirm -S --needed mingw-w64-x86_64-ntldd mingw64/mingw-w64-x86_64-gmp
+              CMAKE_ARGS+=(-G "MSYS Makefiles")
+          fi
           if [ "$RUNNER_OS" == "macOS" ]; then
               brew install gmp
           fi
-          cmake . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake . -B build -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS[@]+"${CMAKE_ARGS[@]}"}
           cmake --build build --config Release
 
       - name: Copy files
@@ -114,13 +123,16 @@ jobs:
               cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
               patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
           fi
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "${{ matrix.target_name }}" == "x86_64-windows" ]; then
               cp "$CONDA_PREFIX/Library/bin/gmp.dll" dist/bin/
               cp "$CONDA_PREFIX/Library/bin/mpir.dll" dist/bin/
+          fi
+          if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
+              cp "$(ntldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
           fi
 
       - name: Run Example
         shell: bash -el {0}
         run: |
-          cd dist
-          ./FloatTetwild_bin --input ../tests/bunny.off --level 0  --stop-energy 200
+          cd dist/bin
+          ./FloatTetwild_bin --input ../../tests/bunny.off --level 0  --stop-energy 200
