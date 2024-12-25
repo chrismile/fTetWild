@@ -99,7 +99,8 @@ jobs:
               export GMP_LIB=$CONDA_PREFIX/Library/lib
           fi
           if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
-              pacman --noconfirm -S --needed mingw-w64-x86_64-ntldd mingw64/mingw-w64-x86_64-gmp
+              pacman --noconfirm -S --needed mingw64/mingw-w64-x86_64-cmake mingw64/mingw-w64-x86_64-gcc \
+              mingw-w64-x86_64-ntldd mingw64/mingw-w64-x86_64-gmp
               CMAKE_ARGS+=(-G "MSYS Makefiles")
           fi
           if [ "$RUNNER_OS" == "macOS" ]; then
