@@ -50,13 +50,17 @@ jobs:
           # Linux targets.
           - os: ubuntu-22.04
             target_name: x86_64-linux
+            shell: bash
           - os: ubuntu-24.04
             target_name: x86_64-linux-u2404
+            shell: bash
           # Windows targets.
           - os: windows-2022
             target_name: x86_64-windows
+            shell: 'bash -el {0}'
           - os: windows-2022
             target_name: x86_64-windows-gnu
+            shell: 'msys2 {0}'
 
     name: "Create release-artifacts target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
@@ -79,7 +83,7 @@ jobs:
           python-version: 3.12
 
       - name: Build target
-        shell: bash -el {0}
+        shell: ${{ matrix.shell }}
         run: |
           CMAKE_ARGS=()
           if [ "$RUNNER_OS" == "Linux" ]; then
@@ -102,7 +106,7 @@ jobs:
           cmake --build build --config Release
 
       - name: Copy files
-        shell: bash -el {0}
+        shell: ${{ matrix.shell }}
         run: |
           proj_name=${{ github.event.repository.name }}
           exec_name=FloatTetwild_bin
