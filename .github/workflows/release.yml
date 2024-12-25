@@ -51,7 +51,7 @@ jobs:
           - os: ubuntu-22.04
             target_name: x86_64-linux
           # Windows targets.
-          - os: windows-latest
+          - os: windows-2019
             target_name: x86_64-windows
 
     name: "Create release-artifacts target ${{ matrix.target_name }}"
