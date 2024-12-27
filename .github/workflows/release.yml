@@ -51,16 +51,17 @@ jobs:
           - os: ubuntu-22.04
             target_name: x86_64-linux
             shell: bash
-          - os: ubuntu-24.04
-            target_name: x86_64-linux-u2404
-            shell: bash
+          #- os: ubuntu-24.04
+          #  target_name: x86_64-linux-u2404
+          #  shell: bash
           # Windows targets.
           - os: windows-2022
             target_name: x86_64-windows
             shell: 'bash -el {0}'
-          - os: windows-2022
-            target_name: x86_64-windows-gnu
-            shell: 'msys2 {0}'
+          # MinGW build is not supported by fTetWild.
+          #- os: windows-2022
+          #  target_name: x86_64-windows-gnu
+          #  shell: 'msys2 {0}'
 
     name: "Create release-artifacts target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
@@ -121,13 +122,24 @@ jobs:
           mkdir dist/lib/cmake
           mkdir dist/lib/cmake/${proj_name}
           if [ "$RUNNER_OS" == "Windows" ]; then
-              cp "build/${exec_name}.exe" "dist/bin/"
+              if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
+                  cp "build/${exec_name}.exe" "dist/bin/"
+              else
+                  cp "build/Release/${exec_name}.exe" "dist/bin/"
+              fi
           else
               cp "build/${exec_name}" "dist/bin/"
           fi
           cp "README.md" "dist/docs"
           cp "LICENSE.MPL2" "dist/docs/LICENSE"
           cp "LICENSE-gmp.txt" "dist/docs/LICENSE-gmp.txt"
+          cp "3rdparty/cli11/LICENSE" "dist/docs/LICENSE-cli11.txt"
+          cp "3rdparty/fmt/LICENSE.rst" "dist/docs/LICENSE-fmt.txt"
+          cp "3rdparty/geogram/LICENSE" "dist/docs/LICENSE-geogram.txt"
+          cp "3rdparty/json/LICENSE.MIT" "dist/docs/LICENSE-json.txt"
+          cp "3rdparty/libigl/LICENSE.MPL2" "dist/docs/LICENSE-libigl.txt"
+          cp "3rdparty/spdlog/LICENSE" "dist/docs/LICENSE-spdlog.txt"
+          cp "3rdparty/tbb/LICENSE" "dist/docs/LICENSE-tbb.txt"
           cp "cmake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
           cp src/*.h dist/include/
           cp src/*.hpp dist/include/
@@ -136,6 +148,8 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
               if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
                   cp "build/libFloatTetwild.a" dist/lib/
+              else
+                  cp "build/Release/FloatTetwild.lib" dist/lib/
               fi
           fi
           # Copy GMP libraries.

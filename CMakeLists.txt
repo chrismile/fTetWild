@@ -180,6 +180,10 @@ if(FLOAT_TETWILD_TOPLEVEL_PROJECT)
 	endif()
 endif()
 
+if (UNIX AND NOT APPLE)
+	add_compile_options("-Wno-error=changes-meaning")
+endif()
+
 ################################################################################
 # Subdirectories
 ################################################################################

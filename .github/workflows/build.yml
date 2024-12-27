@@ -53,9 +53,10 @@ jobs:
           - os: windows-2022
             target_name: x86_64-windows
             shell: 'bash -el {0}'
-          - os: windows-2022
-            target_name: x86_64-windows-gnu
-            shell: 'msys2 {0}'
+          # MinGW build is not supported by fTetWild.
+          #- os: windows-2022
+          #  target_name: x86_64-windows-gnu
+          #  shell: 'msys2 {0}'
 
     name: "${{ github.workflow }} target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
@@ -124,6 +125,13 @@ jobs:
           cp "README.md" "dist/docs"
           cp "LICENSE.MPL2" "dist/docs/LICENSE"
           cp "LICENSE-gmp.txt" "dist/docs/LICENSE-gmp.txt"
+          cp "3rdparty/cli11/LICENSE" "dist/docs/LICENSE-cli11.txt"
+          cp "3rdparty/fmt/LICENSE.rst" "dist/docs/LICENSE-fmt.txt"
+          cp "3rdparty/geogram/LICENSE" "dist/docs/LICENSE-geogram.txt"
+          cp "3rdparty/json/LICENSE.MIT" "dist/docs/LICENSE-json.txt"
+          cp "3rdparty/libigl/LICENSE.MPL2" "dist/docs/LICENSE-libigl.txt"
+          cp "3rdparty/spdlog/LICENSE" "dist/docs/LICENSE-spdlog.txt"
+          cp "3rdparty/tbb/LICENSE" "dist/docs/LICENSE-tbb.txt"
           cp "cmake/${proj_name}Config.cmake" "dist/lib/cmake/${proj_name}/"
           cp src/*.h dist/include/
           cp src/*.hpp dist/include/
