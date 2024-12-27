@@ -43,8 +43,8 @@ endfunction()
 ## Catch2
 function(float_tetwild_download_catch2)
     float_tetwild_download_project(Catch2
-        URL          https://github.com/catchorg/Catch2/archive/refs/tags/v3.1.1.tar.gz
-        URL_MD5      1f3e0d8c3297252f77d643ff06d058cb
+        URL          https://github.com/catchorg/Catch2/archive/refs/tags/v3.7.1.tar.gz
+        URL_MD5      9fcbec1dc95edcb31c6a0d6c5320e098
     )
 endfunction()
 
