@@ -59,8 +59,8 @@ endfunction()
 ## tbb
 function(float_tetwild_download_tbb)
     float_tetwild_download_project(tbb
-        GIT_REPOSITORY https://github.com/wjakob/tbb.git
-        GIT_TAG        9e219e24fe223b299783200f217e9d27790a87b0
+        GIT_REPOSITORY https://github.com/chrismile/tbb-wjakob.git
+        GIT_TAG        253fef41e4b93b9321db1066802a93c2d99cea82
     )
 endfunction()
 
@@ -91,19 +91,17 @@ endfunction()
 ## Geogram LGPL
 function(float_tetwild_download_geogram)
     float_tetwild_download_project(geogram
-#        GIT_REPOSITORY   https://github.com/polyfem/geogram.git
-#        GIT_TAG          e6b9612f1146370e40deaa341b4dd7ef90502102
-            GIT_REPOSITORY https://github.com/Yixin-Hu/geogram
-            GIT_TAG        b613750341a6cdd31ae8df80ecfc26ac7ca1a6ad
+        GIT_REPOSITORY https://github.com/chrismile/geogram
+        GIT_TAG        b1e0e6732b29abdbe7650ee5304a1e4b84b4ad86
     )
 endfunction()
 
 ## aabbcc
 function(float_tetwild_download_aabbcc)
     float_tetwild_download_project(aabbcc
-            GIT_REPOSITORY https://github.com/lohedges/aabbcc.git
-            GIT_TAG        0c85e61362d384d70c71946826bfed0fb24a74ba
-            )
+        GIT_REPOSITORY https://github.com/lohedges/aabbcc.git
+        GIT_TAG        0c85e61362d384d70c71946826bfed0fb24a74ba
+    )
 endfunction()
 
 ### winding number
@@ -118,7 +116,7 @@ endfunction()
 ## exact envelope
 function(float_tetwild_download_exact_envelope)
     float_tetwild_download_project(exact_envelope
-            GIT_REPOSITORY https://github.com/wangbolun300/fast-envelope
-            GIT_TAG        520ee04b6c69a802db31d1fd3a3e6e382d10ef98
-            )
+        GIT_REPOSITORY https://github.com/wangbolun300/fast-envelope
+        GIT_TAG        520ee04b6c69a802db31d1fd3a3e6e382d10ef98
+    )
 endfunction()

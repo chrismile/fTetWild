@@ -180,8 +180,8 @@ if(FLOAT_TETWILD_TOPLEVEL_PROJECT)
 	endif()
 endif()
 
-if (UNIX AND NOT APPLE)
-	add_compile_options("-Wno-error=changes-meaning")
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0)
+	add_compile_options(-Wno-error=changes-meaning)
 endif()
 
 ################################################################################
