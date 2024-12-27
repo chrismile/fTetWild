@@ -113,7 +113,11 @@ jobs:
           mkdir dist/lib/cmake
           mkdir dist/lib/cmake/${proj_name}
           if [ "$RUNNER_OS" == "Windows" ]; then
-              cp "build/${exec_name}.exe" "dist/bin/"
+              if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
+                  cp "build/${exec_name}.exe" "dist/bin/"
+              else
+                  cp "build/Release/${exec_name}.exe" "dist/bin/"
+              fi
           else
               cp "build/${exec_name}" "dist/bin/"
           fi
@@ -128,6 +132,8 @@ jobs:
           elif [ "$RUNNER_OS" == "Windows" ]; then
               if [ "${{ matrix.target_name }}" == "x86_64-windows-gnu" ]; then
                   cp "build/libFloatTetwild.a" dist/lib/
+              else
+                  cp "build/Release/FloatTetwild.lib" dist/lib/
               fi
           fi
           # Copy GMP libraries.
