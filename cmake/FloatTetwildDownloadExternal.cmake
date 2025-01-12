@@ -92,7 +92,7 @@ endfunction()
 function(float_tetwild_download_geogram)
     float_tetwild_download_project(geogram
         GIT_REPOSITORY https://github.com/chrismile/geogram
-        GIT_TAG        b1e0e6732b29abdbe7650ee5304a1e4b84b4ad86
+        GIT_TAG        822d29497d3dab8640a2f557457631ae76031649
     )
 endfunction()
 
