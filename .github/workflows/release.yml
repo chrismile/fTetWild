@@ -62,9 +62,9 @@ jobs:
             target_name: x86_64-windows
             shell: 'bash -el {0}'
           # MinGW build is not supported by fTetWild.
-          #- os: windows-2022
-          #  target_name: x86_64-windows-gnu
-          #  shell: 'msys2 {0}'
+          - os: windows-2022
+            target_name: x86_64-windows-gnu
+            shell: 'msys2 {0}'
 
     name: "Create release-artifacts target ${{ matrix.target_name }}"
     runs-on: ${{ matrix.os }}
