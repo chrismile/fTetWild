@@ -23,6 +23,10 @@ message(STATUS "Found Geogram here: ${GEOGRAM_ROOT}")
 
 ################################################################################
 
+MinGW-x86_64-w64
+if(MSYS OR MINGW OR (${CMAKE_GENERATOR} STREQUAL "MinGW Makefiles") OR (${CMAKE_GENERATOR} STREQUAL "MSYS Makefiles"))
+	set(VORPALINE_PLATFORM MinGW-x86_64-w64 CACHE STRING "" FORCE)
+	set(VORPALINE_BUILD_DYNAMIC false CACHE STRING "" FORCE)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(VORPALINE_ARCH_64 TRUE CACHE BOOL "" FORCE)
 	set(VORPALINE_PLATFORM Win-vs-generic CACHE STRING "" FORCE)
