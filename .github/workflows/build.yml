@@ -49,6 +49,9 @@ jobs:
           - os: ubuntu-24.04
             target_name: x86_64-linux-u2404
             shell: bash
+          - os: ubuntu-22.04
+            target_name: aarch64-linux
+            shell: bash
           # Windows targets.
           - os: windows-2022
             target_name: x86_64-windows
@@ -83,7 +86,28 @@ jobs:
         run: |
           CMAKE_ARGS=()
           if [ "$RUNNER_OS" == "Linux" ]; then
-              sudo apt install -y libgmp-dev patchelf
+              if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+                  # https://askubuntu.com/questions/1307659/arm64-multi-arch-docker-build-fails-on-apt-update/1307721#1307721
+                  sudo dpkg --add-architecture arm64
+                  sudo sed -i "s/deb h/deb [arch=amd64] h/g" /etc/apt/sources.list
+                  sudo echo "# arm64 repositories" >> /etc/apt/sources.list
+                  release_codename="$(lsb_release -cs)"
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename} main restricted" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-updates main restricted" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename} universe" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-updates universe" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename} multiverse" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-updates multiverse" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-backports main restricted universe multiverse" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-security main restricted" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-security universe" >> /etc/apt/sources.list
+                  sudo echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${release_codename}-security multiverse" >> /etc/apt/sources.list
+                  sudo apt update
+                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf:arm64 qemu-user-static
+                  CMAKE_ARGS+=(-DCMAKE_TOOLCHAIN_FILE="cmake/aarch64-linux-gnu.toolchain.cmake")
+              else
+                  sudo apt install -y libgmp-dev patchelf
+              fi
           fi
           if [ "${{ matrix.target_name }}" == "x86_64-windows" ]; then
               export CONDA_ALWAYS_YES="true"
@@ -147,7 +171,11 @@ jobs:
           # Copy GMP libraries.
           if [ "$RUNNER_OS" == "Linux" ]; then
               cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
-              patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+                  qemu-aarch64-static patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              else
+                  patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              fi
           fi
           if [ "${{ matrix.target_name }}" == "x86_64-windows" ]; then
               cp "$CONDA_PREFIX/Library/bin/gmp.dll" dist/bin/
