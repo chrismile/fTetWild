@@ -104,7 +104,7 @@ jobs:
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security universe" >> /etc/apt/sources.list'
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security multiverse" >> /etc/apt/sources.list'
                   sudo apt update
-                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf:arm64 qemu-user-static
+                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf patchelf:arm64 qemu-user-static qemu-user
                   CMAKE_ARGS+=(-DCMAKE_TOOLCHAIN_FILE="cmake/aarch64-linux-gnu.toolchain.cmake")
               else
                   sudo apt install -y libgmp-dev patchelf
@@ -172,11 +172,12 @@ jobs:
           # Copy GMP libraries.
           if [ "$RUNNER_OS" == "Linux" ]; then
               cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
-              if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
-                  qemu-aarch64-static patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
-              else
-                  patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
-              fi
+              patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              #if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+              #    qemu-aarch64-static patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              #else
+              #    patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
+              #fi
           fi
           if [ "${{ matrix.target_name }}" == "x86_64-windows" ]; then
               cp "$CONDA_PREFIX/Library/bin/gmp.dll" dist/bin/
@@ -189,4 +190,8 @@ jobs:
       - name: Run Example
         run: |
           cd dist/bin
-          ./FloatTetwild_bin --input ../../tests/bunny.off --level 0  --stop-energy 200
+          if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+              qemu-aarch64 -L /usr/aarch64-linux-gnu ./FloatTetwild_bin --input ../../tests/bunny.off --level 0  --stop-energy 200
+          else
+              ./FloatTetwild_bin --input ../../tests/bunny.off --level 0  --stop-energy 200
+          fi

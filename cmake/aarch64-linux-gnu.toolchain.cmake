@@ -23,6 +23,7 @@ endif()
 
 set(CMAKE_C_FLAGS "-march=armv8-a")
 set(CMAKE_CXX_FLAGS "-march=armv8-a")
+set(CROSS_COMPILE_ARM64 TRUE)
 
 # cache flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}" CACHE STRING "c flags")
