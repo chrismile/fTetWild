@@ -112,7 +112,7 @@ jobs:
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security universe" >> /etc/apt/sources.list'
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security multiverse" >> /etc/apt/sources.list'
                   sudo apt update
-                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf patchelf:arm64 qemu-user-static qemu-user
+                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf qemu-user-static qemu-user
                   CMAKE_ARGS+=(-DCMAKE_TOOLCHAIN_FILE="cmake/aarch64-linux-gnu.toolchain.cmake")
               else
                   sudo apt install -y libgmp-dev patchelf
