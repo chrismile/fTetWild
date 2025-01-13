@@ -49,9 +49,9 @@ jobs:
           - os: ubuntu-24.04
             target_name: x86_64-linux-u2404
             shell: bash
-          - os: ubuntu-22.04
-            target_name: aarch64-linux
-            shell: bash
+          #- os: ubuntu-22.04
+          #  target_name: aarch64-linux
+          #  shell: bash
           # Windows targets.
           - os: windows-2022
             target_name: x86_64-windows
