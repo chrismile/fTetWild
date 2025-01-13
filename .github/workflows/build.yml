@@ -173,6 +173,7 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
                   wget https://raw.githubusercontent.com/chrismile/cross-compile-ldd/refs/heads/main/aarch64-linux-gnu-ldd
+                  chmod +x ./aarch64-linux-gnu-ldd
                   cp "$(./aarch64-linux-gnu-ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
               else
                   cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
