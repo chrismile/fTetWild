@@ -104,7 +104,7 @@ jobs:
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security universe" >> /etc/apt/sources.list'
                   sudo bash -c 'echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports $(lsb_release -cs)-security multiverse" >> /etc/apt/sources.list'
                   sudo apt update
-                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf qemu-user-static qemu-user
+                  sudo apt install -y g++-aarch64-linux-gnu libc6-dev-arm64-cross libgmp-dev:arm64 patchelf qemu-user-static qemu-user binutils-aarch64-linux-gnu
                   CMAKE_ARGS+=(-DCMAKE_TOOLCHAIN_FILE="cmake/aarch64-linux-gnu.toolchain.cmake")
               else
                   sudo apt install -y libgmp-dev patchelf
@@ -171,7 +171,12 @@ jobs:
           fi
           # Copy GMP libraries.
           if [ "$RUNNER_OS" == "Linux" ]; then
-              cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
+              if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
+                  wget https://raw.githubusercontent.com/chrismile/cross-compile-ldd/refs/heads/main/aarch64-linux-gnu-ldd
+                  cp "$(./aarch64-linux-gnu-ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
+              else
+                  cp "$(ldd "build/${exec_name}" | grep libgmp | awk '{print $3}')" dist/bin/
+              fi
               patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
               #if [ "${{ matrix.target_name }}" == "aarch64-linux" ]; then
               #    qemu-aarch64-static patchelf --set-rpath '$ORIGIN' "dist/bin/${exec_name}"
