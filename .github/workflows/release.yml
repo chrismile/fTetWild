@@ -202,14 +202,19 @@ jobs:
           fi
           mv dist ${{ env.artifact_name }}
 
-      #- name: Create archive (Unix)
-      #  shell: bash
-      #  run: |
-      #    zip -r ${{ env.artifact_name }}.zip ${{ env.artifact_name }}
+      # vimtor removes the '+x' flag (https://github.com/vimtor/action-zip/issues/21) on Linux/macOS.
       - uses: vimtor/action-zip@v1.2
+        if: runner.os == 'Windows'
         with:
           files: ${{ env.artifact_name }}/
           dest: ${{ env.artifact_name }}.zip
+      - name: Create archive (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          pushd ${{ env.artifact_name }} >/dev/null
+          zip -r ../${{ env.artifact_name }}.zip .
+          popd >/dev/null
 
       # Needs "Read and write permission" under "Workflow permissions" on https://github.com/chrismile/tetgen/settings/actions.
       - name: Create release
