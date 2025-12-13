@@ -63,11 +63,12 @@ if(NOT TARGET spdlog::spdlog)
 endif()
 
 # libigl
+cmake_policy(SET CMP0169 OLD)
 if(NOT TARGET igl::core)
     FetchContent_Declare(
         libigl
-        GIT_REPOSITORY https://github.com/libigl/libigl.git
-        GIT_TAG        v2.6.0   
+        GIT_REPOSITORY https://github.com/chrismile/libigl.git
+        GIT_TAG        7c6d49ffc1e5db0978cfa4505dba7a6c56553a1d
     )
     set(LIBIGL_BUILD_STATIC ON CACHE BOOL "" FORCE)
     set(LIBIGL_BUILD_SHARED OFF CACHE BOOL "" FORCE)
