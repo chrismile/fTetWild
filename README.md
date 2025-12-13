@@ -111,7 +111,7 @@ Our software is quite easy to use. Basically, users only need to provide a surfa
 
 - Envelope of size *epsilon*
 
-Using smaller envelope preserves features better but also takes longer time. The default value of *epsilon* is *b/1000*, where *b* is the length of the diagonal of the bounding box.
+Using smaller envelope preserves features better but also takes longer time (Users can enable [Fast Envelope](https://github.com/wangbolun300/fast-envelope) by turning on [this cmake flag](https://github.com/wildmeshing/fTetWild/blob/master/CMakeLists.txt#L46) to reduce the running time). The default value of *epsilon* is *b/1000*, where *b* is the length of the diagonal of the bounding box.
 
 - Ideal edge length
 
@@ -148,7 +148,8 @@ Options:
   -o,--output TEXT            Output tetmesh OUTPUT in .msh format. (string, optional, default: input_file+postfix+'.msh')
   --tag TEXT:FILE             Tag input faces for Boolean operation.
   --op INT                    Boolean operation: 0: union, 1: intersection, 2: difference.
-  -l,--lr FLOAT               ideal_edge_length = diag_of_bbox * L. (double, optional, default: 0.05)
+  -a,--la FLOAT               Ideal edge length not scaled by diag_of_bbox. Excludes: --lr. (double, optional)
+  -l,--lr FLOAT               ideal_edge_length = diag_of_bbox * L. Excludes: --la. (double, optional, default: 0.05)
   -e,--epsr FLOAT             epsilon = diag_of_bbox * EPS. (double, optional, default: 1e-3)
   --stop-energy FLOAT         Stop optimization when max energy is lower than this.
   --log TEXT                  Log info to given file.

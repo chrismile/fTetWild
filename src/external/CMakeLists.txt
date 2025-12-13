@@ -54,10 +54,6 @@ else()
 			bfs_orient.h
 			bfs_orient.cpp
 
-#			WindingNumber.h
-#			FastWindingNumber.hpp
-#			FastWindingNumber.cpp
-
 			Rational.h
 			)
 endif()

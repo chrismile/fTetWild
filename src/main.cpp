@@ -9,7 +9,8 @@
 #include <CLI/CLI.hpp>
 
 #ifdef FLOAT_TETWILD_USE_TBB
-#include <tbb/task_scheduler_init.h>
+#include <oneapi/tbb.h>
+#include <oneapi/tbb/global_control.h>
 #include <thread>
 #endif
 
@@ -29,6 +30,8 @@
 
 #include <igl/Timer.h>
 #include <igl/write_triangle_mesh.h>
+#include "igl/default_num_threads.h"
+
 
 #ifdef LIBIGL_WITH_TETGEN
 #include <igl/copyleft/tetgen/tetrahedralize.h>
@@ -41,7 +44,7 @@
 #include <bitset>
 
 using namespace floatTetWild;
-using namespace Eigen;
+//using namespace Eigen;
 
 class GeoLoggerForward : public GEO::LoggerClient
 {
@@ -192,10 +195,16 @@ int main(int argc, char** argv)
     command_line.add_option(
       "--op", boolean_op, "Boolean operation: 0: union, 1: intersection, 2: difference.");
 
-    command_line.add_option(
+    auto absolute_op = command_line.add_option(
+      "-a,--la",
+      params.ideal_edge_length_abs,
+      "Ideal edge length not scaled by diag_of_bbox. (double, optional)");
+    auto relative_op = command_line.add_option(
       "-l,--lr",
       params.ideal_edge_length_rel,
       "ideal_edge_length = diag_of_bbox * L. (double, optional, default: 0.05)");
+    relative_op->excludes(absolute_op);
+
     command_line.add_option("-e,--epsr",
                             params.eps_rel,
                             "epsilon = diag_of_bbox * EPS. (double, optional, default: 1e-3)");
@@ -268,13 +277,17 @@ int main(int argc, char** argv)
     }
 
 #ifdef FLOAT_TETWILD_USE_TBB
-    const size_t MB          = 1024 * 1024;
-    const size_t stack_size  = 64 * MB;
+    const size_t MB         = 1024 * 1024;
+    const size_t stack_size = 64 * MB;
     unsigned int num_threads = std::max(1u, std::thread::hardware_concurrency());
     num_threads              = std::min(max_threads, num_threads);
     params.num_threads       = num_threads;
     std::cout << "TBB threads " << num_threads << std::endl;
-    tbb::task_scheduler_init scheduler(num_threads, stack_size);
+    tbb::global_control parallelism_limit(tbb::global_control::max_allowed_parallelism, num_threads);
+    tbb::global_control stack_size_limit(tbb::global_control::thread_stack_size, stack_size);
+    // IGL has issues with a nested for loop and oversubscription, see
+    // https://github.com/libigl/libigl/issues/2412
+    igl::default_num_threads(std::ceil(std::sqrt(num_threads)));
 #endif
 
     //    if(params.is_quiet){
@@ -323,8 +336,8 @@ int main(int argc, char** argv)
     if (V_in.rows() != 0 && T_in.rows() != 0 && values.rows() != 0) {
         params.apply_sizing_field = true;
 
-        params.V_sizing_field = V_in;
-        params.T_sizing_field = T_in;
+        params.V_sizing_field      = V_in;
+        params.T_sizing_field      = T_in;
         params.values_sizing_field = values;
     }
 
@@ -641,26 +654,26 @@ int main(int argc, char** argv)
     return EXIT_SUCCESS;
 }
 
-//#include <igl/readSTL.h>
-//#include <igl/writeSTL.h>
-//#include <igl/writeOFF.h>
-// void connect_2_meshes(std::string m1, std::string m2, std::string m) {
-//    Eigen::MatrixXd v1, v2, _;
-//    Eigen::MatrixXi f1, f2;
+// #include <igl/readSTL.h>
+// #include <igl/writeSTL.h>
+// #include <igl/writeOFF.h>
+//  void connect_2_meshes(std::string m1, std::string m2, std::string m) {
+//     Eigen::MatrixXd v1, v2, _;
+//     Eigen::MatrixXi f1, f2;
 //
-//    igl::readSTL(m1, v1, f1, _);
-//    igl::readSTL(m2, v2, f2, _);
+//     igl::readSTL(m1, v1, f1, _);
+//     igl::readSTL(m2, v2, f2, _);
 //
-//    MatrixXd V(v1.rows() + v2.rows(), v1.cols());
-//    V << v1, v2;
+//     MatrixXd V(v1.rows() + v2.rows(), v1.cols());
+//     V << v1, v2;
 //
-//    int v1_rows = v1.rows();
-//    for (int i = 0; i < f2.rows(); i++) {
-//        for (int j = 0; j < 3; j++)
-//            f2(i, j) += v1_rows;
-//    }
-//    MatrixXi F(f1.rows() + f2.rows(), f1.cols());
-//    F << f1, f2;
+//     int v1_rows = v1.rows();
+//     for (int i = 0; i < f2.rows(); i++) {
+//         for (int j = 0; j < 3; j++)
+//             f2(i, j) += v1_rows;
+//     }
+//     MatrixXi F(f1.rows() + f2.rows(), f1.cols());
+//     F << f1, f2;
 //
 ////    igl::writeOFF(m+".off", V, F);
 //    igl::writeSTL(m+".stl", V, F);
@@ -674,7 +687,7 @@ int main(int argc, char** argv)
 //    //pausee();
 //}
 //
-//#include <igl/readMESH.h>
+// #include <igl/readMESH.h>
 // void test_manifold(std::string& file_name){
 //    Eigen::MatrixXd V;
 //    Eigen::MatrixXi T, F;
