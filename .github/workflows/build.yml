@@ -124,7 +124,7 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
               brew install gmp
           fi
-          cmake . -B build -DCMAKE_BUILD_TYPE=Release ${CMAKE_ARGS[@]+"${CMAKE_ARGS[@]}"}
+          cmake . -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ${CMAKE_ARGS[@]+"${CMAKE_ARGS[@]}"}
           cmake --build build --config Release
 
       - name: Copy files
