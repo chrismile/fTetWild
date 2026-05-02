@@ -34,6 +34,7 @@
 #include <tbb/concurrent_vector.h>
 #endif
 
+#include <algorithm>
 #include <bitset>
 #include <numeric>
 #include <unordered_map>
